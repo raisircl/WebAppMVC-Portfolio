@@ -1,0 +1,35 @@
+﻿@model Student[]
+
+@{
+  
+    Layout = "~/Views/Shared/_LayoutDefault.cshtml";
+    //int x = ViewData["rollno"]!=null ? Convert.ToInt32(ViewData["rollno"]):0; // Added default value
+    //int y = ViewBag.Age;
+
+}
+
+<h1>Student List</h1>
+@if (Model != null && Model.Length > 0)
+{
+    <table class="table table-hover">
+    
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Age</th>
+    </tr>
+@foreach(var student in Model)
+{
+     
+    <tr>
+        <td>@student.Id</td>
+        <td>@student.Name</td>
+        <td>@student.Age</td>
+    </tr>
+}
+</table>
+}
+else
+{
+    <p>No students available.</p>
+}   
