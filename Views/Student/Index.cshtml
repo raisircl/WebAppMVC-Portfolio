@@ -17,6 +17,7 @@
         <th>Id</th>
         <th>Name</th>
         <th>Age</th>
+        <th>Action</th>
     </tr>
 @foreach(var student in Model)
 {
@@ -25,6 +26,9 @@
         <td>@student.Id</td>
         <td>@student.Name</td>
         <td>@student.Age</td>
+        <td><a asp-controller="Student" asp-action="Details" asp-route-id="@student.Id">Details</a></td>
+                <td><a asp-controller="Student" asp-action="Search" asp-route-name="@student.Name" asp-route-age="@student.Age">Search</a></td>
+
     </tr>
 }
 </table>
