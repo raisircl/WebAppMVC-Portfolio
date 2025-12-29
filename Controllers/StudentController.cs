@@ -1,28 +1,39 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Dapper;
+using Microsoft.AspNetCore.Mvc;
+using System.Data;
 using WebAppMVC.Models;
-
+using Microsoft.Data.SqlClient; 
 namespace WebAppMVC.Controllers
 {
     public class StudentController : Controller
     {
-        public IActionResult Index()
+        private readonly string constr;
+        public StudentController(IConfiguration configuration)
         {
-            Student[] students = new Student[] {
-                new Student() { Id=1001, Name="Ram", Age=20 }
-                , new Student() { Id=1002, Name="Shyam", Age=22 }
-                , new Student() { Id=1003, Name="Mohan", Age=21 }
-                , new Student() { Id=1004, Name="Sohan", Age=23 }
-            };
+            constr = configuration.GetConnectionString("Default");
+        }
+        private IDbConnection CreateConnection() => new SqlConnection(constr);
+        public async Task<IActionResult> Index()
+        {
+            //Student[] students = new Student[] {
+            //    new Student() { Id=1001, Name="Ram", Age=20 }
+            //    , new Student() { Id=1002, Name="Shyam", Age=22 }
+            //    , new Student() { Id=1003, Name="Mohan", Age=21 }
+            //    , new Student() { Id=1004, Name="Sohan", Age=23 }
+            //};
 
-            //student.Id = 1001;
-            //student.Name = "John Doe";
-            //student.Age = 21;
+            ////student.Id = 1001;
+            ////student.Name = "John Doe";
+            ////student.Age = 21;
 
-            ViewData["Title"] = "All Students";
-            //ViewBag.Message = "Welcome to the Student Index Page!";
-            //ViewData["rollno"] = 101;   
-            //ViewBag.Age = 20;   
-            return View(students);
+            //ViewData["Title"] = "All Students";
+            ////ViewBag.Message = "Welcome to the Student Index Page!";
+            ////ViewData["rollno"] = 101;   
+            ////ViewBag.Age = 20;   
+            using var conn = CreateConnection();
+            var sql = "SELECT * FROM tblstudents";
+            var students= await conn.QueryAsync<Student>(sql);
+            return View(students);      
         }
         public IActionResult Details([FromRoute]int id)
         {
@@ -41,11 +52,17 @@ namespace WebAppMVC.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Create([FromForm]Student student)
+        public async Task<IActionResult> Create(Student student)
         {
-            // Save the student to the database (not implemented here)
-            // For now, just redirect to the Index action
-            return RedirectToAction("Index");
+            ModelState.Remove("Id"); // to ignore Id validation as it is not entered by user    
+            if (!ModelState.IsValid)
+            {
+                return View(student);
+            }
+            using var conn = CreateConnection();
+            var sql = "INSERT INTO tblstudents (Name, Age) VALUES (@Name, @Age)";
+            var result = await conn.ExecuteAsync(sql, student);
+            return RedirectToAction("Index"); //PRG
         }
 
         [HttpGet]
